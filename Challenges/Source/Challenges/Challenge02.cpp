@@ -11,14 +11,62 @@
 #include "../Debug/Debug.hpp"
 #include "../Utils/ChallengeResult.hpp"
 
+#include <charconv>
 #include <chrono>
 #include <cstdint>
 #include <filesystem>
 #include <fstream>
 #include <iostream>
+#include <print>
+#include <ranges>
 #include <string>
+#include <string_view>
+#include <system_error>
 
 namespace aoc {
+
+// ****************************************************************************************************************** //
+//                                                      HELPER                                                        //
+// ****************************************************************************************************************** //
+
+namespace {
+
+bool IsInvalid(std::string_view id)
+{
+    bool invalid{false};
+    if ((id.size() % 2) != 0) {
+        return invalid;
+    }
+
+    std::size_t middle = id.size() / 2;
+    if (id.substr(0, middle) == id.substr(middle)) {
+        invalid = true;
+    }
+
+    // std::println("Cmp: {:>16}|{:<16} -> {:>5}", id.substr(0, middle), id.substr(middle), invalid);
+    return invalid;
+}
+
+std::int64_t convertViewToInt(std::string_view viewToConvert)
+{
+    std::int64_t converted{};
+
+    auto [ptr, ec] = std::from_chars(viewToConvert.data(), viewToConvert.data() + viewToConvert.size(), converted);
+    if (ec == std::errc()) {
+        return converted;
+    }
+    else if (ec == std::errc::invalid_argument) {
+        std::println("This is not a number.");
+        return 0;
+    }
+    else if (ec == std::errc::result_out_of_range) {
+        std::println("This number is larger than an std::int64_t.");
+        return 0;
+    }
+    return converted;
+}
+
+} // namespace
 
 // ****************************************************************************************************************** //
 //                                                      PUBLIC                                                        //
@@ -69,7 +117,6 @@ ChallengeResult Challenge02::RunChallenge()
 bool Challenge02::ReadFile()
 {
     std::ifstream fileToRead(m_FilePath);
-    std::string   line{};
 
     if (!fileToRead.is_open()) {
         std::cout << "Failed to open " << m_FilePath << " ...\n";
@@ -77,10 +124,8 @@ bool Challenge02::ReadFile()
     }
 
     std::cout << "Reading file " << m_FilePath << " ...\n\n";
-    while (std::getline(fileToRead, line)) {
-        debug::logMessage("Line read: ", line, " Length(", line.size(), "): ");
-
-        /** @todo Do something. */
+    while (std::getline(fileToRead, m_ProductRanges)) {
+        debug::logMessage("Line read: ", m_ProductRanges, " Length(", m_ProductRanges.size(), ")");
     }
     return true;
 }
@@ -89,7 +134,47 @@ std::int64_t Challenge02::PartI()
 {
     std::int64_t result{};
 
+    using std::operator""sv;
+    for (const auto range : std::ranges::views::split(m_ProductRanges, ","sv)) {
+        /** @todo Things happen in here. */
+        std::string_view rangeView{range};
+        std::size_t      posOfHyphen{rangeView.find_first_of('-')};
+        std::string_view from{rangeView.substr(0, posOfHyphen)};
+        std::string_view to{rangeView.substr(posOfHyphen + 1)};
+        // std::println("Rng: {:^32}, Pos: {:>3}, From: {:>10}, To: {:>10}", rangeView, posOfHyphen, from, to);
+        result += SumInvalidProductIDsOfRange(from, to);
+        // std::println("Res: {:>16}", result);
+    }
+
     return result;
+}
+
+std::int64_t Challenge02::SumInvalidProductIDsOfRange(const std::string_view fromView,
+                                                      const std::string_view toView) const
+{
+    std::int64_t sumOfInvalidIDs{};
+
+    if (fromView == toView) {
+        sumOfInvalidIDs += convertViewToInt(fromView) * static_cast<std::int64_t>(IsInvalid(fromView));
+
+        return sumOfInvalidIDs;
+    }
+
+    struct Range {
+        const std::int64_t From{};
+        const std::int64_t To{};
+    };
+
+    const Range range{convertViewToInt(fromView), convertViewToInt(toView)};
+
+    for (std::int64_t current = range.From; current <= range.To; current++) {
+        if (IsInvalid(std::to_string(current))) {
+            sumOfInvalidIDs += current;
+        }
+        // std::println("Psm: {:>16}", sumOfInvalidIDs);
+    }
+
+    return sumOfInvalidIDs;
 }
 
 std::int64_t Challenge02::PartII()

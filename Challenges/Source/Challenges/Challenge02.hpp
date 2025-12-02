@@ -13,6 +13,8 @@
 
 #include <cstdint>
 #include <filesystem>
+#include <string>
+#include <string_view>
 
 namespace aoc {
 
@@ -31,9 +33,11 @@ public:
 private:
     bool         ReadFile() override;
     std::int64_t PartI();
+    std::int64_t SumInvalidProductIDsOfRange(const std::string_view fromView, const std::string_view toView) const;
     std::int64_t PartII();
 
 private:
+    std::string m_ProductRanges;
 };
 
 } // namespace aoc
