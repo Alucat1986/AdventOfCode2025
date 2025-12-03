@@ -9,6 +9,7 @@
 
 #include "../Challenges/Challenge01.hpp"
 #include "../Challenges/Challenge02.hpp"
+#include "../Challenges/Challenge03.hpp"
 #include "../Debug/Debug.hpp"
 #include "../UI/Menu.hpp"
 #include "../Utils/ChallengeResult.hpp"
@@ -97,6 +98,8 @@ void App::StartChallenge(std::uint16_t challengeNumber)
             break;
         }
         case 3: {
+            Challenge03 challenge(path);
+            result = challenge.RunChallenge();
             break;
         }
         default:
