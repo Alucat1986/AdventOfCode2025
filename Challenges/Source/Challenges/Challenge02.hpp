@@ -35,6 +35,7 @@ private:
     std::int64_t PartI();
     std::int64_t SumInvalidProductIDsOfRange(const std::string_view fromView, const std::string_view toView) const;
     std::int64_t PartII();
+    std::int64_t SumInvalidProductIDsOfRangePII(const std::string_view fromView, const std::string_view toView) const;
 
 private:
     std::string m_ProductRanges;

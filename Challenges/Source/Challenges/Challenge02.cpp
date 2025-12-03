@@ -8,7 +8,6 @@
 #include "Challenge02.hpp"
 
 #include "BaseChallenge.hpp"
-#include "../Debug/Debug.hpp"
 #include "../Utils/ChallengeResult.hpp"
 
 #include <charconv>
@@ -47,6 +46,36 @@ bool IsInvalid(std::string_view id)
     return invalid;
 }
 
+bool IsInvalidPII(std::string_view id)
+{
+    bool        invalid{false};
+    std::size_t div{2};
+
+    while (div <= id.size()) {
+        if ((id.size() % div) != 0) {
+            div++;
+            continue;
+        }
+        std::size_t      same{};
+        std::size_t      divPoint = id.size() / div;
+        std::string_view subStr   = id.substr(0, divPoint);
+        for (std::size_t i = 0; i < id.size(); i += divPoint) {
+            if (id.substr(i, divPoint) == subStr) {
+                same++;
+            }
+        }
+
+        if (same == div) {
+            invalid = true;
+            break;
+        }
+        div++;
+    }
+
+    // std::println("Cmp: {:>16} -> {:>5}", id, invalid);
+    return invalid;
+}
+
 std::int64_t convertViewToInt(std::string_view viewToConvert)
 {
     std::int64_t converted{};
@@ -80,11 +109,11 @@ Challenge02::Challenge02(const std::filesystem::path& filePath)
         : BaseChallenge(filePath)
 {
     if (!ReadFile()) {
-        debug::logMessage("Challenge 01:: Initialisation failed: File not loaded", m_FilePath);
+        std::println("Challenge 02:: Initialisation failed: {} not loaded", m_FilePath.string());
         return;
     }
 
-    debug::logMessage("Challenge 01 initialised with file: ", m_FilePath);
+    std::println("Challenge 02 initialised with file: {}", m_FilePath.string());
 }
 
 /**
@@ -119,13 +148,13 @@ bool Challenge02::ReadFile()
     std::ifstream fileToRead(m_FilePath);
 
     if (!fileToRead.is_open()) {
-        std::cout << "Failed to open " << m_FilePath << " ...\n";
+        std::println("Failed to open {}...", m_FilePath.string());
         return false;
     }
 
     std::cout << "Reading file " << m_FilePath << " ...\n\n";
     while (std::getline(fileToRead, m_ProductRanges)) {
-        debug::logMessage("Line read: ", m_ProductRanges, " Length(", m_ProductRanges.size(), ")");
+        std::println("Line: \"{}\", Length({})", m_ProductRanges, m_ProductRanges.size());
     }
     return true;
 }
@@ -133,15 +162,15 @@ bool Challenge02::ReadFile()
 std::int64_t Challenge02::PartI()
 {
     std::int64_t result{};
+    std::println("-= Part I =-");
 
     using std::operator""sv;
     for (const auto range : std::ranges::views::split(m_ProductRanges, ","sv)) {
-        /** @todo Things happen in here. */
         std::string_view rangeView{range};
         std::size_t      posOfHyphen{rangeView.find_first_of('-')};
         std::string_view from{rangeView.substr(0, posOfHyphen)};
         std::string_view to{rangeView.substr(posOfHyphen + 1)};
-        // std::println("Rng: {:^32}, Pos: {:>3}, From: {:>10}, To: {:>10}", rangeView, posOfHyphen, from, to);
+        std::println("Rng: {:^32}, Pos: {:>3}, From: {:>10}, To: {:>10}", rangeView, posOfHyphen, from, to);
         result += SumInvalidProductIDsOfRange(from, to);
         // std::println("Res: {:>16}", result);
     }
@@ -180,8 +209,48 @@ std::int64_t Challenge02::SumInvalidProductIDsOfRange(const std::string_view fro
 std::int64_t Challenge02::PartII()
 {
     std::int64_t result{};
+    std::println("-= Part II =-");
+
+    using std::operator""sv;
+    for (const auto range : std::ranges::views::split(m_ProductRanges, ","sv)) {
+        std::string_view rangeView{range};
+        std::size_t      posOfHyphen{rangeView.find_first_of('-')};
+        std::string_view from{rangeView.substr(0, posOfHyphen)};
+        std::string_view to{rangeView.substr(posOfHyphen + 1)};
+        std::println("Rng: {:^32}, Pos: {:>3}, From: {:>10}, To: {:>10}", rangeView, posOfHyphen, from, to);
+        result += SumInvalidProductIDsOfRangePII(from, to);
+        // std::println("Res: {:>16}", result);
+    }
 
     return result;
+}
+
+std::int64_t Challenge02::SumInvalidProductIDsOfRangePII(const std::string_view fromView,
+                                                         const std::string_view toView) const
+{
+    std::int64_t sumOfInvalidIDs{};
+
+    if (fromView == toView) {
+        sumOfInvalidIDs += convertViewToInt(fromView) * static_cast<std::int64_t>(IsInvalid(fromView));
+
+        return sumOfInvalidIDs;
+    }
+
+    struct Range {
+        const std::int64_t From{};
+        const std::int64_t To{};
+    };
+
+    const Range range{convertViewToInt(fromView), convertViewToInt(toView)};
+
+    for (std::int64_t current = range.From; current <= range.To; current++) {
+        if (IsInvalidPII(std::to_string(current))) {
+            sumOfInvalidIDs += current;
+        }
+        // std::println("Psm: {:>16}", sumOfInvalidIDs);
+    }
+
+    return sumOfInvalidIDs;
 }
 
 } // namespace aoc
