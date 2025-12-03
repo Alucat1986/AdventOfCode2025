@@ -10,6 +10,15 @@
 #include "../Challenges/Challenge01.hpp"
 #include "../Challenges/Challenge02.hpp"
 #include "../Challenges/Challenge03.hpp"
+#include "../Challenges/Challenge04.hpp"
+#include "../Challenges/Challenge05.hpp"
+#include "../Challenges/Challenge06.hpp"
+#include "../Challenges/Challenge07.hpp"
+#include "../Challenges/Challenge08.hpp"
+#include "../Challenges/Challenge09.hpp"
+#include "../Challenges/Challenge10.hpp"
+#include "../Challenges/Challenge11.hpp"
+#include "../Challenges/Challenge12.hpp"
 #include "../Debug/Debug.hpp"
 #include "../UI/Menu.hpp"
 #include "../Utils/ChallengeResult.hpp"
@@ -99,6 +108,51 @@ void App::StartChallenge(std::uint16_t challengeNumber)
         }
         case 3: {
             Challenge03 challenge(path);
+            result = challenge.RunChallenge();
+            break;
+        }
+        case 4: {
+            Challenge04 challenge(path);
+            result = challenge.RunChallenge();
+            break;
+        }
+        case 5: {
+            Challenge05 challenge(path);
+            result = challenge.RunChallenge();
+            break;
+        }
+        case 6: {
+            Challenge06 challenge(path);
+            result = challenge.RunChallenge();
+            break;
+        }
+        case 7: {
+            Challenge07 challenge(path);
+            result = challenge.RunChallenge();
+            break;
+        }
+        case 8: {
+            Challenge08 challenge(path);
+            result = challenge.RunChallenge();
+            break;
+        }
+        case 9: {
+            Challenge09 challenge(path);
+            result = challenge.RunChallenge();
+            break;
+        }
+        case 10: {
+            Challenge10 challenge(path);
+            result = challenge.RunChallenge();
+            break;
+        }
+        case 11: {
+            Challenge11 challenge(path);
+            result = challenge.RunChallenge();
+            break;
+        }
+        case 12: {
+            Challenge12 challenge(path);
             result = challenge.RunChallenge();
             break;
         }

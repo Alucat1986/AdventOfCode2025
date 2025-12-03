@@ -1,20 +1,23 @@
 /**
  * @file
+ * @brief Contains the Challenge04 class declaration.
  * @author Alunya
- * @brief Contains the abstract base challenge class declaration.
- * @date 01.12.2025
+ * @date 04.12.2025
  */
 
-#ifndef AOC_BASECHALLENGE_HPP
-#define AOC_BASECHALLENGE_HPP
+#ifndef AOC_CHALLENGE_04_HPP
+#define AOC_CHALLENGE_04_HPP
 
 // ****************************************************************************************************************** //
 // ** INCLUDES                                                                                                        //
 // ****************************************************************************************************************** //
 
+#include "BaseChallenge.hpp"
 #include "../Utils/ChallengeResult.hpp"
 
+#include <cstdint>
 #include <filesystem>
+#include <vector>
 
 // ****************************************************************************************************************** //
 // ** DECLARATIONS                                                                                                    //
@@ -22,26 +25,18 @@
 
 namespace aoc {
 
-/**
- * @class BaseChallenge
- * @brief Abstract class for challenges.
- *
- * The BaseChallenge class serves as a blueprint for all challenge implementations.
- * It provides a common interface and shared functionality for reading input files,
- * running challenges, and storing results.
- */
-class BaseChallenge {
+class Challenge04 : public BaseChallenge {
 public:
-    BaseChallenge(const std::filesystem::path& filePath);
+    Challenge04(const std::filesystem::path& filePath);
 
-    virtual ChallengeResult RunChallenge() = 0;
+    ChallengeResult RunChallenge() override;
 
-protected:
-    virtual bool ReadFile() = 0;
+private:
+    bool         ReadFile() override;
+    std::int64_t PartI();
+    std::int64_t PartII();
 
-protected:
-    ChallengeResult             m_Result;
-    const std::filesystem::path m_FilePath;
+private:
 };
 
 } // namespace aoc
@@ -50,4 +45,4 @@ protected:
 // ** END OF FILE                                                                                                     //
 // ****************************************************************************************************************** //
 
-#endif // ifndef AOC_BASECHALLENGE_HPP
+#endif // #ifndef AOC_CHALLENGE_04_HPP
