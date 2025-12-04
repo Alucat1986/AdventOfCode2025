@@ -34,9 +34,14 @@ public:
 private:
     bool         ReadFile() override;
     std::int64_t PartI();
+    std::int64_t FindNeighbours(const std::int64_t currentRow, const std::int64_t currentColumn) const;
     std::int64_t PartII();
+    void         PrintWarehouse() const;
 
 private:
+    std::vector<char> m_Warehouse;
+    std::int64_t      m_Width{};
+    std::int64_t      m_Height{};
 };
 
 } // namespace aoc

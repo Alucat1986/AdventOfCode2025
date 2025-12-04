@@ -90,6 +90,7 @@ void App::StartChallenge(std::uint16_t challengeNumber)
     if (challengeNumber < 10) {
         tmpFile += "0";
     }
+    // tmpFile  += std::to_string(challengeNumber) + "_example.txt";
     tmpFile += std::to_string(challengeNumber) + "_input.txt";
     path     = path / tmpFile;
 

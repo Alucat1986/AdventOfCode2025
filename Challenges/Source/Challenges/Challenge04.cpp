@@ -51,11 +51,11 @@ Challenge04::Challenge04(const std::filesystem::path& filePath)
         : BaseChallenge(filePath)
 {
     if (!ReadFile()) {
-        std::println("Challenge 03:: Initialisation failed: {} not loaded", m_FilePath.string());
+        std::println("Challenge 04:: Initialisation failed: {} not loaded", m_FilePath.string());
         return;
     }
 
-    std::println("Challenge 03 initialised with file: {}", m_FilePath.string());
+    std::println("Challenge 04 initialised with file: {}", m_FilePath.string());
 }
 
 /**
@@ -102,9 +102,17 @@ bool Challenge04::ReadFile()
     }
 
     std::println("Reading file {}...", m_FilePath.string());
+
+    std::int64_t rows{};
     while (std::getline(fileToRead, line)) {
         std::println("Line: \"{}\", Length({})", line, line.size());
+        rows++;
+        for (const auto letter : line) {
+            m_Warehouse.emplace_back(letter);
+        }
     }
+    m_Width  = static_cast<std::int64_t>(line.size());
+    m_Height = rows;
     return true;
 }
 
@@ -112,14 +120,85 @@ std::int64_t Challenge04::PartI()
 {
     std::int64_t result{};
 
+    PrintWarehouse();
+    for (std::int64_t row{}; row < m_Height; row++) {
+        for (std::int64_t column{}; column < m_Width; column++) {
+            std::size_t index = static_cast<std::size_t>(row * m_Width + column);
+            if (m_Warehouse.at(index) == '.') {
+                continue;
+            }
+            std::int64_t neighbours{FindNeighbours(row, column)};
+            std::println("({}/{}) has {} neighbours.", column, row, neighbours);
+            if (neighbours < 4) {
+                result++;
+            }
+        }
+    }
+
     return result;
+}
+
+std::int64_t Challenge04::FindNeighbours(const std::int64_t currentRow, const std::int64_t currentColumn) const
+{
+    std::int64_t neighbours{};
+
+    for (std::int64_t row{currentRow - 1}; row <= currentRow + 1; row++) {
+        if (row < 0 || row >= m_Height) {
+            continue;
+        }
+        for (std::int64_t column{currentColumn - 1}; column <= currentColumn + 1; column++) {
+            if ((column < 0 || column >= m_Width) || (row == currentRow && column == currentColumn)) {
+                continue;
+            }
+
+            std::size_t index = static_cast<std::size_t>(row * m_Width + column);
+            if (m_Warehouse.at(index) == '@') {
+                neighbours++;
+                // std::println("({}/{}) neighbour at ({}/{})", currentColumn, currentRow, column, row);
+            }
+        }
+    }
+
+    return neighbours;
 }
 
 std::int64_t Challenge04::PartII()
 {
     std::int64_t result{};
+    bool         paperRemoved{false};
+
+    PrintWarehouse();
+    do {
+        paperRemoved = false;
+        for (std::int64_t row{}; row < m_Height; row++) {
+            for (std::int64_t column{}; column < m_Width; column++) {
+                std::size_t index = static_cast<std::size_t>(row * m_Width + column);
+                if (m_Warehouse.at(index) == '.' || m_Warehouse.at(index) == 'x') {
+                    continue;
+                }
+                std::int64_t neighbours{FindNeighbours(row, column)};
+                std::println("({}/{}) has {} neighbours.", column, row, neighbours);
+                if (neighbours < 4) {
+                    m_Warehouse.at(index) = 'x';
+                    paperRemoved          = true;
+                    result++;
+                }
+            }
+        }
+    } while (paperRemoved);
 
     return result;
+}
+
+void Challenge04::PrintWarehouse() const
+{
+    for (std::int64_t row{}; row < m_Height; row++) {
+        for (std::int64_t column{}; column < m_Width; column++) {
+            std::size_t index = static_cast<std::size_t>(row * m_Width + column);
+            std::print("{}", m_Warehouse.at(index));
+        }
+        std::println();
+    }
 }
 
 } // namespace aoc
