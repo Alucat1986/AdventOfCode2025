@@ -55,7 +55,7 @@ Challenge03::Challenge03(const std::filesystem::path& filePath)
         return;
     }
 
-    std::println("Challenge 03 initialised with file: {}", m_FilePath.string());
+    std::println("Challenge 03:: Initialised with file: {}", m_FilePath.string());
 }
 
 /**

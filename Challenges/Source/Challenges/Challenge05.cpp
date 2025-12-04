@@ -51,11 +51,11 @@ Challenge05::Challenge05(const std::filesystem::path& filePath)
         : BaseChallenge(filePath)
 {
     if (!ReadFile()) {
-        std::println("Challenge 03:: Initialisation failed: {} not loaded", m_FilePath.string());
+        std::println("Challenge 05:: Initialisation failed: {} not loaded", m_FilePath.string());
         return;
     }
 
-    std::println("Challenge 03 initialised with file: {}", m_FilePath.string());
+    std::println("Challenge 05:: Initialised with file: {}", m_FilePath.string());
 }
 
 /**

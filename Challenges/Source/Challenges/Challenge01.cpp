@@ -56,7 +56,7 @@ Challenge01::Challenge01(const std::filesystem::path& filePath)
         return;
     }
 
-    debug::logMessage("Challenge 01 initialised with file: ", m_FilePath);
+    debug::logMessage("Challenge 01:: Initialised with file: ", m_FilePath);
 }
 
 /**

@@ -23,14 +23,11 @@
 #include "BaseChallenge.hpp"
 #include "../Utils/ChallengeResult.hpp"
 
-#include <algorithm>
 #include <chrono>
 #include <cstdint>
 #include <fstream>
-#include <iterator>
 #include <print>
 #include <string>
-#include <utility>
 #include <vector>
 
 // ****************************************************************************************************************** //
@@ -55,7 +52,7 @@ Challenge04::Challenge04(const std::filesystem::path& filePath)
         return;
     }
 
-    std::println("Challenge 04 initialised with file: {}", m_FilePath.string());
+    std::println("Challenge 04:: Initialised with file: {}", m_FilePath.string());
 }
 
 /**
