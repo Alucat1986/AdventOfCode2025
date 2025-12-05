@@ -197,8 +197,8 @@ std::int64_t Challenge05::PartII()
     MergeRanges();
 
     for (const auto& range : m_ProductRanges) {
+        std::println("{} with {}", range, range.NumberOfElements());
         result += range.NumberOfElements();
-        ;
     }
 
     return result;

@@ -23,12 +23,13 @@
 #include "../UI/Menu.hpp"
 #include "../Utils/ChallengeResult.hpp"
 
+#include <chrono>
 #include <cstdint>
 #include <filesystem>
-#include <iomanip>
 #include <ios>
 #include <iostream>
 #include <limits>
+#include <print>
 #include <string>
 
 namespace aoc {
@@ -90,7 +91,7 @@ void App::StartChallenge(std::uint16_t challengeNumber)
     if (challengeNumber < 10) {
         tmpFile += "0";
     }
-    // tmpFile  += std::to_string(challengeNumber) + "_example.txt";
+    // tmpFile += std::to_string(challengeNumber) + "_example.txt";
     tmpFile += std::to_string(challengeNumber) + "_input.txt";
     path     = path / tmpFile;
 
@@ -176,7 +177,11 @@ void App::StartChallenge(std::uint16_t challengeNumber)
  */
 void App::PrintResults(const ChallengeResult& result) const
 {
-    std::cout << "\n===========================================================\n";
+    std::println("===========================================================");
+    std::println("Part  I: {:>16} |{:>20}: {:>10}", result.partI, "Time of Execution", result.executionTimePartI);
+    std::println("Part II: {:>16} |{:>20}: {:>10}", result.partII, "Time of Execution", result.executionTimePartII);
+    std::println("===========================================================");
+    /*
     std::cout << std::left << std::setw(8) << "PartI:" << std::right << std::setw(10) << result.partI << std::left
               << std::setw(14) << "  Time of execution:" << std::right << std::setw(10)
               << std::chrono::duration_cast<std::chrono::microseconds>(result.executionTimePartI) << "\n";
@@ -184,6 +189,7 @@ void App::PrintResults(const ChallengeResult& result) const
               << std::setw(14) << "  Time of execution:" << std::right << std::setw(10)
               << std::chrono::duration_cast<std::chrono::microseconds>(result.executionTimePartII) << "\n";
     std::cout << "===========================================================\n";
+    */
 }
 
 } // namespace aoc
