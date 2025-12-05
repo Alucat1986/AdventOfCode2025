@@ -39,6 +39,7 @@
 // ** HELPER                                                                                                          //
 // ****************************************************************************************************************** //
 
+// https://www.cppstories.com/2022/custom-stdformat-cpp20/
 template<>
 struct std::formatter<aoc::ProductRange> : std::formatter<std::string_view> {
     constexpr auto parse(std::format_parse_context& ctx) { return ctx.begin(); }
@@ -193,6 +194,7 @@ std::int64_t Challenge05::PartII()
     */
 
     PruneRanges();
+    MergeRanges();
 
     for (const auto& range : m_ProductRanges) {
         result += range.NumberOfElements();
@@ -204,10 +206,10 @@ std::int64_t Challenge05::PartII()
 
 void Challenge05::PruneRanges()
 {
-    bool mergeHappened{false};
+    bool pruningHappened{false};
     std::println("Pruning... {}", m_ProductRanges.size());
     do {
-        mergeHappened = false;
+        pruningHappened = false;
         for (auto& rangeToPrune : m_ProductRanges) {
             if (rangeToPrune.IsZeroRange()) {
                 continue;
@@ -222,16 +224,17 @@ void Challenge05::PruneRanges()
                 if (rangeToPrune.From >= rangeToCheck.From && rangeToPrune.From <= rangeToCheck.Till) {
                     if (rangeToPrune.Till >= rangeToCheck.From && rangeToPrune.Till <= rangeToCheck.Till) {
                         std::println("Range {} within {}", rangeToPrune, rangeToCheck);
-                        rangeToPrune  = {0, 0};
-                        mergeHappened = true;
+                        rangeToPrune    = {0, 0};
+                        pruningHappened = true;
                         std::println("New Ranges {} and {}", rangeToPrune, rangeToCheck);
                         continue;
                     }
 
                     std::println("Range {} shortened because partially in {}", rangeToPrune, rangeToCheck);
-                    rangeToCheck.Till = rangeToPrune.Till;
-                    rangeToPrune      = {0, 0};
-                    mergeHappened     = true;
+                    // rangeToCheck.Till = rangeToPrune.Till;
+                    rangeToPrune.From = rangeToCheck.From;
+                    rangeToCheck      = {0, 0};
+                    pruningHappened   = true;
                     std::println("New Ranges {} and {}", rangeToPrune, rangeToCheck);
                     continue;
                 }
@@ -240,13 +243,54 @@ void Challenge05::PruneRanges()
                     std::println("Range {} shortened because partially in {}", rangeToPrune, rangeToCheck);
                     rangeToPrune.Till = rangeToCheck.Till;
                     rangeToCheck      = {0, 0};
-                    mergeHappened     = true;
+                    pruningHappened   = true;
                     std::println("New Ranges {} and {}", rangeToPrune, rangeToCheck);
                     continue;
                 }
             }
         }
-    } while (mergeHappened);
+    } while (pruningHappened);
+    CleanRanges();
+}
+
+void Challenge05::MergeRanges()
+{
+    bool mergingHappened{false};
+    std::println("Merging... {}", m_ProductRanges.size());
+    do {
+        mergingHappened = false;
+        for (auto& rangeToMergeInto : m_ProductRanges) {
+            if (rangeToMergeInto.IsZeroRange()) {
+                continue;
+            }
+            for (auto& rangeToMerge : m_ProductRanges) {
+                if (rangeToMergeInto == rangeToMerge) {
+                    continue;
+                }
+                if (rangeToMerge.IsZeroRange()) {
+                    continue;
+                }
+
+                if (rangeToMergeInto.From == rangeToMerge.Till + 1) {
+                    rangeToMergeInto.From = rangeToMerge.From;
+                    rangeToMerge          = {0, 0};
+                    mergingHappened       = true;
+                    std::println("New Ranges {} and {}", rangeToMergeInto, rangeToMerge);
+                }
+                else if (rangeToMergeInto.Till == rangeToMerge.From + 1) {
+                    rangeToMergeInto.Till = rangeToMerge.Till;
+                    rangeToMerge          = {0, 0};
+                    mergingHappened       = true;
+                    std::println("New Ranges {} and {}", rangeToMergeInto, rangeToMerge);
+                }
+            }
+        }
+    } while (mergingHappened);
+    CleanRanges();
+}
+
+void Challenge05::CleanRanges()
+{
     std::erase_if(m_ProductRanges, [](ProductRange range) { return range.IsZeroRange(); });
     std::println("Erased removed ranges! {}", m_ProductRanges.size());
 }

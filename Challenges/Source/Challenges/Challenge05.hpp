@@ -56,6 +56,8 @@ private:
     bool         IsProductFresh(const std::int64_t productID) const;
     std::int64_t PartII();
     void         PruneRanges();
+    void         MergeRanges();
+    void         CleanRanges();
 
 private:
     std::vector<ProductRange> m_ProductRanges;
