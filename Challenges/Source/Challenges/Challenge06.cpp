@@ -24,12 +24,15 @@
 #include "../Utils/ChallengeResult.hpp"
 
 #include <algorithm>
+#include <charconv>
 #include <chrono>
 #include <cstdint>
 #include <fstream>
+#include <functional>
 #include <iterator>
 #include <print>
 #include <string>
+#include <unordered_map>
 #include <utility>
 #include <vector>
 
@@ -104,6 +107,57 @@ bool Challenge06::ReadFile()
     std::println("Reading file {}...", m_FilePath.string());
     while (std::getline(fileToRead, line)) {
         std::println("Line: \"{}\", Length({})", line, line.size());
+
+        std::size_t posOfNum   = line.find_first_not_of(' ');
+        std::size_t posOfSpace = line.find_first_of(' ');
+
+        if (posOfNum > posOfSpace) {
+            line       = line.substr(posOfNum);
+            posOfSpace = line.find_first_of(' ');
+        }
+
+        std::size_t problemCounter{};
+        while (posOfNum != std::string::npos) {
+            if (line.contains("+") || line.contains("*")) {
+                // Ugly, but I don't know else currently.
+                if (posOfSpace == std::string::npos && posOfNum == 0) {
+                    break;
+                }
+
+                m_Operands.emplace_back(line[posOfNum]);
+
+                if (posOfSpace != std::string::npos) {
+                    line = line.substr(posOfSpace);
+                }
+                posOfNum = line.find_first_not_of(' ');
+                if (posOfNum != std::string::npos) {
+                    line = line.substr(posOfNum);
+                }
+                posOfSpace = line.find_first_of(' ');
+                posOfNum   = line.find_first_not_of(' ');
+                continue;
+            }
+            std::int64_t num{};
+            std::string  temp{line.substr(0, posOfSpace)};
+            std::from_chars(temp.data(), temp.data() + temp.size(), num);
+
+            // Ugly, but I don't know else currently.
+            if (posOfSpace == std::string::npos && posOfNum == 0) {
+                break;
+            }
+
+            m_Problems[problemCounter].emplace_back(num);
+            problemCounter++;
+
+            if (posOfSpace != std::string::npos) {
+                line = line.substr(posOfSpace);
+            }
+            posOfNum = line.find_first_not_of(' ');
+            if (posOfNum != std::string::npos) {
+                line = line.substr(posOfNum);
+            }
+            posOfSpace = line.find_first_of(' ');
+        }
     }
     return true;
 }
@@ -111,6 +165,20 @@ bool Challenge06::ReadFile()
 std::int64_t Challenge06::PartI()
 {
     std::int64_t result{};
+
+    for (auto& [index, range] : m_Problems) {
+        if (m_Operands[index] == '+') {
+            std::int64_t temp = std::ranges::fold_left_first(range, std::plus()).value();
+            std::println("{} = {}, {}", temp, range, m_Operands[index]);
+            result += std::ranges::fold_left_first(range, std::plus()).value();
+        }
+        else if (m_Operands[index] == '*') {
+            std::int64_t temp = std::ranges::fold_left_first(range, std::multiplies()).value();
+            std::println("{} = {}, {}", temp, range, m_Operands[index]);
+            result += std::ranges::fold_left_first(range, std::multiplies()).value();
+        }
+        std::println("Result {}", result);
+    }
 
     return result;
 }

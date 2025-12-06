@@ -17,6 +17,8 @@
 
 #include <cstdint>
 #include <filesystem>
+#include <string>
+#include <unordered_map>
 #include <vector>
 
 // ****************************************************************************************************************** //
@@ -37,6 +39,8 @@ private:
     std::int64_t PartII();
 
 private:
+    std::unordered_map<std::size_t, std::vector<std::int64_t>> m_Problems;
+    std::vector<char>                                          m_Operands;
 };
 
 } // namespace aoc
