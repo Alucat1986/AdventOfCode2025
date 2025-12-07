@@ -31,6 +31,7 @@
 #include <functional>
 #include <iterator>
 #include <print>
+#include <stack>
 #include <string>
 #include <unordered_map>
 #include <utility>
@@ -107,6 +108,7 @@ bool Challenge06::ReadFile()
     std::println("Reading file {}...", m_FilePath.string());
     while (std::getline(fileToRead, line)) {
         std::println("Line: \"{}\", Length({})", line, line.size());
+        m_ProblemsTwo.push_back(line);
 
         std::size_t posOfNum   = line.find_first_not_of(' ');
         std::size_t posOfSpace = line.find_first_of(' ');
@@ -146,7 +148,7 @@ bool Challenge06::ReadFile()
                 break;
             }
 
-            m_Problems[problemCounter].emplace_back(num);
+            m_ProblemsOne[problemCounter].emplace_back(num);
             problemCounter++;
 
             if (posOfSpace != std::string::npos) {
@@ -166,7 +168,7 @@ std::int64_t Challenge06::PartI()
 {
     std::int64_t result{};
 
-    for (auto& [index, range] : m_Problems) {
+    for (auto& [index, range] : m_ProblemsOne) {
         if (m_Operands[index] == '+') {
             std::int64_t temp = std::ranges::fold_left_first(range, std::plus()).value();
             std::println("{} = {}, {}", temp, range, m_Operands[index]);
@@ -185,7 +187,55 @@ std::int64_t Challenge06::PartI()
 
 std::int64_t Challenge06::PartII()
 {
-    std::int64_t result{};
+    std::int64_t                                                    result{};
+    std::vector<std::reverse_iterator<std::string::const_iterator>> iterators;
+    for (auto& problem : m_ProblemsTwo) {
+        iterators.push_back(problem.crbegin());
+    }
+
+    std::println("Iterator Count: {}", iterators.size());
+    std::stack<std::int64_t> numbers;
+    while (iterators.front() != m_ProblemsTwo.front().crend()) {
+        std::int64_t number{};
+        for (std::size_t index = 0; index < iterators.size(); index++) {
+            std::println("Iter: {}", *iterators[index]);
+            if (index == iterators.size() - 1) {
+                numbers.push(number);
+                std::println("Pushed {}", number);
+                if (*iterators[index] == ' ') {
+                    iterators[index] = std::next(iterators[index], 1);
+                    continue;
+                }
+                else if (*iterators[index] == '+') {
+                    std::int64_t tempResult{};
+                    while (!numbers.empty()) {
+                        tempResult += numbers.top();
+                        numbers.pop();
+                    }
+                    std::println("Added {}", tempResult);
+                    result += tempResult;
+                }
+                else if (*iterators[index] == '*') {
+                    std::int64_t tempResult{1};
+                    while (!numbers.empty()) {
+                        if (numbers.top() == 0) {
+                            numbers.pop();
+                            continue;
+                        }
+                        tempResult *= numbers.top();
+                        numbers.pop();
+                    }
+                    std::println("Added {}", tempResult);
+                    result += tempResult;
+                }
+            }
+            if (*iterators[index] != ' ') {
+                number *= 10;
+                number += *iterators[index] - '0';
+            }
+            iterators[index] = std::next(iterators[index], 1);
+        }
+    }
 
     return result;
 }

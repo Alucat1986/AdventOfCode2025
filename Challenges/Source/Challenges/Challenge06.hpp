@@ -39,7 +39,8 @@ private:
     std::int64_t PartII();
 
 private:
-    std::unordered_map<std::size_t, std::vector<std::int64_t>> m_Problems;
+    std::unordered_map<std::size_t, std::vector<std::int64_t>> m_ProblemsOne;
+    std::vector<std::string>                                   m_ProblemsTwo;
     std::vector<char>                                          m_Operands;
 };
 
