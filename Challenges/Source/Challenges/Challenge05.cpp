@@ -23,11 +23,13 @@
 #include "BaseChallenge.hpp"
 #include "../Utils/ChallengeResult.hpp"
 
+#include <algorithm>
 #include <charconv>
 #include <chrono>
 #include <cstdint>
 #include <format>
 #include <fstream>
+#include <functional>
 #include <iterator>
 #include <print>
 #include <string>
@@ -47,7 +49,7 @@ struct std::formatter<aoc::ProductRange> : std::formatter<std::string_view> {
     auto           format(const aoc::ProductRange& range, std::format_context& ctx) const
     {
         std::string temp{};
-        std::format_to(std::back_inserter(temp), "R[{},{}]", range.From, range.Till);
+        std::format_to(std::back_inserter(temp), "R=[{:>16}, {:>16}]", range.From, range.Till);
         return std::formatter<std::string_view>::format(temp, ctx);
     }
 };
@@ -151,6 +153,8 @@ bool Challenge05::ReadFile()
         // std::println("Appending {} till {}.", range.From, range.Till);
         m_ProductRanges.emplace_back(std::move(range));
     }
+
+    std::ranges::sort(m_ProductRanges, std::ranges::less{}, &ProductRange::From);
     return true;
 }
 
@@ -173,7 +177,7 @@ bool Challenge05::IsProductFresh(const std::int64_t productID) const
         if (productID < range.From || productID > range.Till) {
             continue;
         }
-
+        std::println("Product {:>16} within {}", productID, range);
         return true;
     }
     return false;
@@ -193,12 +197,16 @@ std::int64_t Challenge05::PartII()
     result = static_cast<std::int64_t>(freshProducts.size());
     */
 
+    // Wrong: 375722406401243
+    // Right: 355555479253787
+
     PruneRanges();
-    MergeRanges();
+    // MergeRanges();
 
     for (const auto& range : m_ProductRanges) {
-        std::println("{} with {}", range, range.NumberOfElements());
+        std::print("{} with {:>16} + {:>16} = ", range, result, range.NumberOfElements());
         result += range.NumberOfElements();
+        std::println("{:>16}", result);
     }
 
     return result;
@@ -215,7 +223,7 @@ void Challenge05::PruneRanges()
                 continue;
             }
             for (auto& rangeToCheck : m_ProductRanges) {
-                if (rangeToPrune == rangeToCheck) {
+                if (&rangeToPrune == &rangeToCheck) {
                     continue;
                 }
                 if (rangeToCheck.IsZeroRange()) {
@@ -223,28 +231,28 @@ void Challenge05::PruneRanges()
                 }
                 if (rangeToPrune.From >= rangeToCheck.From && rangeToPrune.From <= rangeToCheck.Till) {
                     if (rangeToPrune.Till >= rangeToCheck.From && rangeToPrune.Till <= rangeToCheck.Till) {
-                        std::println("Range {} within {}", rangeToPrune, rangeToCheck);
+                        std::println("{} within {}", rangeToPrune, rangeToCheck);
                         rangeToPrune    = {0, 0};
                         pruningHappened = true;
-                        std::println("New Ranges {} and {}", rangeToPrune, rangeToCheck);
+                        std::println("New {} and {}", rangeToPrune, rangeToCheck);
                         continue;
                     }
 
-                    std::println("Range {} shortened because partially in {}", rangeToPrune, rangeToCheck);
+                    std::println("Range {} shortened, partially in {}", rangeToPrune, rangeToCheck);
                     // rangeToCheck.Till = rangeToPrune.Till;
                     rangeToPrune.From = rangeToCheck.From;
                     rangeToCheck      = {0, 0};
                     pruningHappened   = true;
-                    std::println("New Ranges {} and {}", rangeToPrune, rangeToCheck);
+                    std::println("New {} and {}", rangeToPrune, rangeToCheck);
                     continue;
                 }
                 else if (rangeToPrune.From < rangeToCheck.From &&
                          (rangeToPrune.Till >= rangeToCheck.From && rangeToPrune.Till <= rangeToCheck.Till)) {
-                    std::println("Range {} shortened because partially in {}", rangeToPrune, rangeToCheck);
+                    std::println("Range {} shortened, partially in {}", rangeToPrune, rangeToCheck);
                     rangeToPrune.Till = rangeToCheck.Till;
                     rangeToCheck      = {0, 0};
                     pruningHappened   = true;
-                    std::println("New Ranges {} and {}", rangeToPrune, rangeToCheck);
+                    std::println("New {} and {}", rangeToPrune, rangeToCheck);
                     continue;
                 }
             }
@@ -275,13 +283,13 @@ void Challenge05::MergeRanges()
                     rangeToMergeInto.From = rangeToMerge.From;
                     rangeToMerge          = {0, 0};
                     mergingHappened       = true;
-                    std::println("New Ranges {} and {}", rangeToMergeInto, rangeToMerge);
+                    std::println("New {} and {}", rangeToMergeInto, rangeToMerge);
                 }
                 else if (rangeToMergeInto.Till == rangeToMerge.From + 1) {
                     rangeToMergeInto.Till = rangeToMerge.Till;
                     rangeToMerge          = {0, 0};
                     mergingHappened       = true;
-                    std::println("New Ranges {} and {}", rangeToMergeInto, rangeToMerge);
+                    std::println("New {} and {}", rangeToMergeInto, rangeToMerge);
                 }
             }
         }
