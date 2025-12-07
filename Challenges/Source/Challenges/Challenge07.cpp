@@ -23,14 +23,13 @@
 #include "BaseChallenge.hpp"
 #include "../Utils/ChallengeResult.hpp"
 
-#include <algorithm>
 #include <chrono>
 #include <cstdint>
 #include <fstream>
-#include <iterator>
 #include <print>
+#include <stack>
 #include <string>
-#include <utility>
+#include <unordered_map>
 #include <vector>
 
 // ****************************************************************************************************************** //
@@ -104,13 +103,57 @@ bool Challenge07::ReadFile()
     std::println("Reading file {}...", m_FilePath.string());
     while (std::getline(fileToRead, line)) {
         std::println("Line: \"{}\", Length({})", line, line.size());
+        m_ManifoldSize.Width = static_cast<std::int64_t>(line.size());
+        if (line.contains("S")) {
+            m_StartPosition.X = static_cast<std::int64_t>(line.find_first_of("S"));
+            m_StartPosition.Y = m_ManifoldSize.Height;
+        }
+
+        m_ManifoldSize.Height++;
+        m_TachyonManifold.insert_range(m_TachyonManifold.end(), line);
     }
     return true;
 }
 
 std::int64_t Challenge07::PartI()
 {
-    std::int64_t result{};
+    std::int64_t                          result{};
+
+    std::stack<Position>                  beams;
+    std::unordered_map<std::size_t, bool> visited;
+
+    beams.push(m_StartPosition);
+
+    std::println("Part I starts...");
+
+    while (!beams.empty()) {
+        Position beam{beams.top()};
+        beams.pop();
+
+        // std::println("Beam at ({}|{}).", beam.X, beam.Y);
+
+        if (beam.X < 0 || beam.X > m_ManifoldSize.Width - 1) {
+            continue;
+        }
+        if (visited.contains(beam.ToIndex(m_ManifoldSize))) {
+            continue;
+        }
+
+        visited.emplace(beam.ToIndex(m_ManifoldSize), true);
+        beam = beam.Advance();
+        if (beam.Y > m_ManifoldSize.Height - 1) {
+            continue;
+        }
+
+        if (m_TachyonManifold.at(beam.ToIndex(m_ManifoldSize)) == '^') {
+            beams.push({beam.X - 1, beam.Y});
+            beams.push({beam.X + 1, beam.Y});
+            result++;
+        }
+        else {
+            beams.push(beam);
+        }
+    }
 
     return result;
 }
@@ -118,6 +161,16 @@ std::int64_t Challenge07::PartI()
 std::int64_t Challenge07::PartII()
 {
     std::int64_t result{};
+
+    std::println("Part II starts...");
+    // Maybe something like, going down the tree from S, counting the amount of Paths a path has at anytime, for example
+    // the pathCount would be 1 until the first splitter, then it splits into 2 paths with each having only 1 pathCount,
+    // but when they reach a splitter again where a merge happens the newly splitted path would be prevPath + prevPath.
+    // e.g.:
+    // .....1.....
+    // ....1^1....
+    // ...1^2^1...
+    // ...12^3^1..
 
     return result;
 }

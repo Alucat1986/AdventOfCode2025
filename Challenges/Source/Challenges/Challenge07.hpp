@@ -17,6 +17,7 @@
 
 #include <cstdint>
 #include <filesystem>
+#include <utility>
 #include <vector>
 
 // ****************************************************************************************************************** //
@@ -37,6 +38,23 @@ private:
     std::int64_t PartII();
 
 private:
+    struct Size {
+        std::int64_t Width{};
+        std::int64_t Height{};
+    };
+
+    struct Position {
+        std::int64_t X{};
+        std::int64_t Y{};
+
+        Position     Advance() const { return {X, Y + 1}; }
+
+        std::size_t  ToIndex(const Size& size) const { return static_cast<std::size_t>(Y * size.Width + X); }
+    };
+
+    std::vector<char> m_TachyonManifold;
+    Size              m_ManifoldSize{};
+    Position          m_StartPosition{};
 };
 
 } // namespace aoc
