@@ -25,6 +25,18 @@
 
 namespace aoc {
 
+struct Vec3 {
+    std::int64_t X{};
+    std::int64_t Y{};
+    std::int64_t Z{};
+};
+
+struct Circuit {
+    std::vector<Vec3> JunctionBoxes;
+};
+
+float euclideanDistance(const Vec3& first, const Vec3& second);
+
 class Challenge08 : public BaseChallenge {
 public:
     Challenge08(const std::filesystem::path& filePath);
@@ -37,6 +49,8 @@ private:
     std::int64_t PartII();
 
 private:
+    std::vector<Circuit> m_Circuits;
+    std::vector<Vec3>    m_JunctionBoxes;
 };
 
 } // namespace aoc

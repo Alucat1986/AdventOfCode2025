@@ -24,14 +24,35 @@
 #include "../Utils/ChallengeResult.hpp"
 
 #include <algorithm>
+#include <charconv>
 #include <chrono>
+#include <cmath>
 #include <cstdint>
+#include <format>
 #include <fstream>
 #include <iterator>
 #include <print>
 #include <string>
+#include <string_view>
 #include <utility>
 #include <vector>
+
+// ****************************************************************************************************************** //
+// ** HELPER                                                                                                          //
+// ****************************************************************************************************************** //
+
+// https://www.cppstories.com/2022/custom-stdformat-cpp20/
+template<>
+struct std::formatter<aoc::Vec3> : std::formatter<std::string_view> {
+    constexpr auto parse(std::format_parse_context& ctx) { return ctx.begin(); }
+
+    auto           format(const aoc::Vec3& vec, std::format_context& ctx) const
+    {
+        std::string temp{};
+        std::format_to(std::back_inserter(temp), "V({:>6}, {:>6}, {:>6})", vec.X, vec.Y, vec.Z);
+        return std::formatter<std::string_view>::format(temp, ctx);
+    }
+};
 
 // ****************************************************************************************************************** //
 // ** IMPLEMENTATIONS                                                                                                 //
@@ -42,6 +63,14 @@ namespace aoc {
 // ****************************************************************************************************************** //
 // ** PUBLIC                                                                                                          //
 // ****************************************************************************************************************** //
+
+float euclideanDistance(const Vec3& first, const Vec3& second)
+{
+    float distX = static_cast<float>(first.X - second.X);
+    float distY = static_cast<float>(first.Y - second.Y);
+    float distZ = static_cast<float>(first.Z - second.Z);
+    return std::sqrtf((distX * distX) + (distY * distY) + (distZ * distZ));
+}
 
 /**
  * @brief Constructor.
@@ -104,6 +133,17 @@ bool Challenge08::ReadFile()
     std::println("Reading file {}...", m_FilePath.string());
     while (std::getline(fileToRead, line)) {
         std::println("Line: \"{}\", Length({})", line, line.size());
+
+        Vec3        box{};
+        std::size_t comma = line.find_first_of(',');
+        std::from_chars(line.data(), line.data() + comma, box.X);
+        line  = line.substr(comma + 1);
+        comma = line.find_first_of(',');
+        std::from_chars(line.data(), line.data() + comma, box.Y);
+        line = line.substr(comma + 1);
+        std::from_chars(line.data(), line.data() + line.size(), box.Z);
+
+        m_JunctionBoxes.emplace_back(std::move(box));
     }
     return true;
 }
@@ -111,6 +151,15 @@ bool Challenge08::ReadFile()
 std::int64_t Challenge08::PartI()
 {
     std::int64_t result{};
+
+    for (auto& boxOne : m_JunctionBoxes) {
+        for (auto& boxTwo : m_JunctionBoxes) {
+            if (&boxOne == &boxTwo) {
+                continue;
+            }
+            std::println("Distance {} to {} -> {:8.2f}", boxOne, boxTwo, euclideanDistance(boxOne, boxTwo));
+        }
+    }
 
     return result;
 }
