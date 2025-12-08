@@ -29,10 +29,16 @@ struct Vec3 {
     std::int64_t X{};
     std::int64_t Y{};
     std::int64_t Z{};
+
+    bool         operator==(const Vec3& other) const;
 };
 
-struct Circuit {
-    std::vector<Vec3> JunctionBoxes;
+struct Pair {
+    Vec3  First{};
+    Vec3  Second{};
+    float Distance{};
+
+    bool  IsSame(const Pair& other) const;
 };
 
 float euclideanDistance(const Vec3& first, const Vec3& second);
@@ -49,8 +55,8 @@ private:
     std::int64_t PartII();
 
 private:
-    std::vector<Circuit> m_Circuits;
-    std::vector<Vec3>    m_JunctionBoxes;
+    std::vector<std::vector<Vec3>> m_Circuits;
+    std::vector<Vec3>              m_JunctionBoxes;
 };
 
 } // namespace aoc

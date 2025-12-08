@@ -28,8 +28,10 @@
 #include <chrono>
 #include <cmath>
 #include <cstdint>
+#include <filesystem>
 #include <format>
 #include <fstream>
+#include <functional>
 #include <iterator>
 #include <print>
 #include <string>
@@ -63,6 +65,19 @@ namespace aoc {
 // ****************************************************************************************************************** //
 // ** PUBLIC                                                                                                          //
 // ****************************************************************************************************************** //
+
+bool Vec3::operator==(const Vec3& other) const
+{
+    return X == other.X && Y == other.Y && Z == other.Z;
+}
+
+bool Pair::IsSame(const Pair& other) const
+{
+    bool sameFirst  = First == other.First || First == other.Second;
+    bool sameSecond = Second == other.First || Second == other.Second;
+    bool sameDist   = Distance == other.Distance;
+    return sameFirst && sameSecond && sameDist;
+}
 
 float euclideanDistance(const Vec3& first, const Vec3& second)
 {
@@ -150,14 +165,36 @@ bool Challenge08::ReadFile()
 
 std::int64_t Challenge08::PartI()
 {
-    std::int64_t result{};
-
+    std::int64_t      result{};
+    std::vector<Pair> pairs;
     for (auto& boxOne : m_JunctionBoxes) {
         for (auto& boxTwo : m_JunctionBoxes) {
             if (&boxOne == &boxTwo) {
                 continue;
             }
-            std::println("Distance {} to {} -> {:8.2f}", boxOne, boxTwo, euclideanDistance(boxOne, boxTwo));
+            Pair newPair{boxOne, boxTwo, euclideanDistance(boxOne, boxTwo)};
+            bool alreadyIn{false};
+            for (auto& pair : pairs) {
+                if (pair.IsSame(newPair)) {
+                    alreadyIn = true;
+                    break;
+                }
+            }
+            if (!alreadyIn) {
+                pairs.emplace_back(std::move(newPair));
+            }
+        }
+    }
+
+    std::ranges::sort(pairs, std::ranges::less{}, &Pair::Distance);
+
+    for (const auto& pair : pairs) {
+        std::println("Distance {} to {} -> {:8.2f}", pair.First, pair.Second, pair.Distance);
+    }
+
+    for (const auto& pair : pairs) {
+        for (const auto& circuit : m_Circuits) {
+            // if (std::ranges::find_if(circuit, pair.First)) {}
         }
     }
 
